@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clarity Analyzer Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script type="text/javascript" src="/eel.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-[#0f172a] text-slate-200 font-['Outfit'] min-h-screen overflow-x-hidden">
+
+    <!-- Los acentos de fondo para que se vea pro -->
+    <div class="fixed top-[-10%] left-[-10%] w-[40%] h-[40%] bg-blue-600/20 rounded-full blur-[120px] -z-10"></div>
+    <div class="fixed bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-purple-600/20 rounded-full blur-[120px] -z-10">
+    </div>
+
+    <main class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- El Header con el titulo y el nav -->
+        <header class="flex justify-between items-center mb-12 animate-fade-in">
+            <div>
+                <h1
+                    class="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-500">
+                    Clarity Analyzer Pro
+                </h1>
+                <p class="text-slate-400 mt-2">Análisis inteligente de comportamiento de usuarios</p>
+            </div>
+            <div id="file-info" class="hidden glass-card px-4 py-2 flex items-center space-x-3">
+                <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+                <span id="current-filename" class="text-sm font-medium"></span>
+            </div>
+        </header>
+
+        <!-- El menu de las tabs - Ahora arriba y siempre visible -->
+        <nav
+            class="flex flex-wrap justify-center gap-2 p-1 bg-slate-900/50 backdrop-blur-md rounded-2xl mb-12 sticky top-4 z-40 border border-slate-800 mx-auto w-fit">
+            <button onclick="switchTab('tab-summary')"
+                class="tab-btn active px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400">Resumen</button>
+            <button onclick="switchTab('tab-audience')"
+                class="tab-btn px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400">Audiencia</button>
+            <button onclick="switchTab('tab-content')"
+                class="tab-btn px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400">Contenido</button>
+            <button onclick="switchTab('tab-tech')"
+                class="tab-btn px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400">Técnico</button>
+            <button onclick="switchTab('tab-explorer')"
+                class="tab-btn px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400">Explorador
+                CSV</button>
+            <button onclick="switchTab('tab-support')"
+                class="tab-btn px-6 py-2.5 rounded-xl text-sm font-bold transition-all text-slate-400">Soporte</button>
+        </nav>
+
+        <!-- Seccion para subir el archivo -->
+        <section id="upload-section" class="mb-12">
+            <div id="drop-zone" class="relative group">
+                <div
+                    class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200">
+                </div>
+                <div
+                    class="relative flex flex-col items-center justify-center border-2 border-dashed border-slate-700 bg-slate-900/50 rounded-2xl p-16 transition-all hover:bg-slate-900/80 hover:border-blue-500 cursor-pointer">
+                    <div class="p-5 bg-slate-800 rounded-full mb-6 group-hover:scale-110 transition-transform">
+                        <svg class="w-10 h-10 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12">
+                            </path>
+                        </svg>
+                    </div>
+                    <h2 class="text-2xl font-bold mb-2 text-white">¡Suelta tu CSV aquí!</h2>
+                    <p class="text-slate-400 mb-6 text-center max-w-md">Sube el reporte de Microsoft Clarity para ver
+                        toda la info bien organizada.</p>
+                    <button onclick="document.getElementById('file-input').click()"
+                        class="px-8 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-xl font-bold transition-all shadow-lg shadow-blue-900/20 active:scale-95">
+                        Seleccionar Archivo
+                    </button>
+                    <input type="file" id="file-input" class="hidden" accept=".csv">
+                </div>
+            </div>
+        </section>
+
+        <!-- Aqui va todo el contenido del dashboard -->
+        <section id="dashboard" class="hidden animate-slide-up pb-20">
+
+            <!-- Tab de Resumen -->
+            <div id="tab-summary" class="tab-content space-y-8">
+                <!-- Los numeritos de arriba -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="glass-card p-6 border-l-4 border-blue-500">
+                        <p class="text-slate-400 text-sm font-bold uppercase tracking-wider">Sesiones Totales</p>
+                        <h3 id="stat-sessions" class="text-3xl font-black mt-2">-</h3>
+                        <p class="text-blue-500/50 text-[10px] mt-2">Visitas registradas</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-purple-500">
+                        <p class="text-slate-400 text-sm font-bold uppercase tracking-wider">Usuarios Únicos</p>
+                        <h3 id="stat-users" class="text-3xl font-black mt-2">-</h3>
+                        <p class="text-purple-500/50 text-[10px] mt-2">Personas distintas</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-emerald-500">
+                        <p class="text-slate-400 text-sm font-bold uppercase tracking-wider">Scroll Promedio</p>
+                        <h3 id="stat-scroll" class="text-3xl font-black mt-2">-</h3>
+                        <p class="text-emerald-500/50 text-[10px] mt-2">Lectura de página</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-orange-500">
+                        <p class="text-slate-400 text-sm font-bold uppercase tracking-wider">Rendimiento Score</p>
+                        <h3 id="stat-performance" class="text-3xl font-black mt-2">-</h3>
+                        <p class="text-orange-500/50 text-[10px] mt-2">Core Web Vitals</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-card p-6 shadow-xl shadow-blue-500/5">
+                        <h4 class="text-xl font-bold mb-6 flex items-center">
+                            <span class="w-2 h-2 bg-orange-500 rounded-full mr-3 shadow-lg shadow-orange-500/50"></span>
+                            Alertas de Frustración
+                        </h4>
+                        <div id="frustration-list" class="space-y-4">
+                            <!-- Aqui metemos lo de clics y eso -->
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 shadow-xl shadow-emerald-500/5">
+                        <h4 class="text-xl font-bold mb-6 flex items-center">
+                            <span
+                                class="w-2 h-2 bg-emerald-500 rounded-full mr-3 shadow-lg shadow-emerald-500/50"></span>
+                            Navegadores (Resumen)
+                        </h4>
+                        <div class="h-64">
+                            <canvas id="browserChartSummary"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab de Audiencia -->
+            <div id="tab-audience" class="tab-content hidden space-y-8">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="glass-card p-8">
+                        <h4 class="text-xl font-bold mb-6">Navegadores Detallados</h4>
+                        <div class="h-80">
+                            <canvas id="browserChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="glass-card p-8">
+                        <h4 class="text-xl font-bold mb-6">Fuentes de Tráfico</h4>
+                        <div class="h-80">
+                            <canvas id="referralChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div id="dynamic-audience-charts" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- Los graficos de pais, so y devices se inyectan aqui -->
+                </div>
+            </div>
+
+            <!-- Tab de Contenido -->
+            <div id="tab-content" class="tab-content hidden space-y-8">
+                <!-- Seccion de Rendimiento -->
+                <div id="perf-section-container" class="glass-card p-8 bg-blue-900/5 border-blue-500/10 border hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-100 italic">Rendimiento por URL</h4>
+                            <p class="text-slate-500 text-sm">Detalle técnico de LCP, INP y Score por cada página</p>
+                        </div>
+                        <div class="relative w-full md:w-80">
+                            <input type="text" id="perf-search" placeholder="Busca una URL específica..."
+                                oninput="filterPerf()"
+                                class="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-200 focus:border-blue-500 focus:outline-none transition-all">
+                            <svg class="w-5 h-5 text-slate-500 absolute left-4 top-3.5" fill="none"
+                                stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="text-slate-500 text-[10px] uppercase font-mono border-b border-slate-800">
+                                    <th class="py-4 px-2 font-bold">URL de la Página</th>
+                                    <th class="py-4 px-2 font-bold text-center">Score</th>
+                                    <th class="py-4 px-2 font-bold text-center text-blue-400">LCP</th>
+                                    <th class="py-4 px-2 font-bold text-center text-purple-400">INP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="perf-list-tbody">
+                                <!-- Las filas con metricas van aqui -->
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="perf-pagination" class="flex justify-center space-x-2 mt-8"></div>
+                </div>
+
+                <!-- Seccion de paginas populares -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 lg:col-span-2">
+                        <div
+                            class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 border-b border-slate-800 pb-4">
+                            <h4 class="text-xl font-bold">Popularidad de Páginas (Sesiones)</h4>
+                            <div class="relative w-full md:w-64">
+                                <input type="text" id="pages-search" placeholder="Filtrar URL..."
+                                    oninput="filterPages()"
+                                    class="w-full bg-slate-900 border border-slate-700 rounded-lg py-2 pl-10 pr-4 text-sm focus:border-blue-500 focus:outline-none transition-all">
+                                <svg class="w-4 h-4 text-slate-500 absolute left-3 top-2.5" fill="none"
+                                    stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div id="pages-list" class="space-y-4">
+                            <!-- Pages will be injected here -->
+                        </div>
+                        <div id="pages-pagination" class="flex justify-center space-x-2 mt-6"></div>
+                    </div>
+                    <div class="glass-card p-8">
+                        <h4 class="text-xl font-bold mb-6 border-b border-slate-800 pb-4">Eventos Inteligentes
+                        </h4>
+                        <div id="events-list" class="space-y-3 pr-2 scrollbar-custom max-h-[600px] overflow-y-auto">
+                            <!-- Events will be injected here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab de Tecnico -->
+            <div id="tab-tech" class="tab-content hidden space-y-8">
+                <div class="glass-card p-8 bg-amber-900/5 border-amber-500/10 border">
+                    <h4 class="text-xl font-bold mb-6 text-amber-500 flex items-center">
+                        <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z">
+                            </path>
+                        </svg>
+                        Errores de JavaScript
+                    </h4>
+                    <div id="js-errors-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- JS Errors will be injected here -->
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="glass-card p-8 bg-red-900/5 border-red-500/10 border">
+                        <h4 class="text-xl font-bold mb-6 text-red-400">Tráfico de Bots</h4>
+                        <div id="bots-list" class="space-y-3">
+                            <!-- Bots info -->
+                        </div>
+                    </div>
+                    <div class="glass-card p-8">
+                        <h4 class="text-xl font-bold mb-6">Core Web Vitals</h4>
+                        <div id="cwv-container" class="space-y-6">
+                            <!-- Data de CWV -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab del Explorador -->
+            <div id="tab-explorer" class="tab-content hidden space-y-8">
+                <div
+                    class="flex flex-col md:flex-row justify-between items-center gap-6 mb-8 bg-slate-900/40 p-6 rounded-2xl border border-slate-800">
+                    <div>
+                        <h4 class="text-xl font-bold text-slate-100">Explorador de Datos</h4>
+                        <p class="text-slate-500 text-sm">Busca y filtra entre todas las tarjetas del archivo</p>
+                    </div>
+                    <div class="relative w-full md:w-96">
+                        <input type="text" id="explorer-search" placeholder="Escribe para buscar secciones..."
+                            oninput="filterExplorer()"
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl py-3 pl-12 pr-4 text-slate-200 focus:border-blue-500 focus:outline-none transition-all shadow-inner">
+                        <svg class="w-5 h-5 text-slate-500 absolute left-4 top-3.5" fill="none" stroke="currentColor"
+                            viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div id="all-sections-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Dynamic sections will be injected here -->
+                </div>
+            </div>
+
+            <!-- Tab de Soporte -->
+            <div id="tab-support" class="tab-content hidden space-y-12 pb-20">
+                <div class="text-center max-w-2xl mx-auto mb-12">
+                    <h2 class="text-4xl font-black text-white mb-4">Centro de Soporte</h2>
+                    <p class="text-slate-400">Estamos aquí para asegurarnos de que tu experiencia sea impecable.</p>
+                </div>
+
+                <!-- Contact Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="glass-card p-8 flex flex-col items-center text-center group hover:border-blue-500/50">
+                        <div
+                            class="w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-2">Correo Electrónico</h4>
+                        <p class="text-slate-500 text-sm mb-4">Respuesta en menos de 24 horas hábiles.</p>
+                        <a href="mailto:kebo.jcg77@gmail.com"
+                            class="text-blue-400 font-bold hover:underline">kebo.jcg77@gmail.com</a>
+                    </div>
+
+                    <div class="glass-card p-8 flex flex-col items-center text-center group hover:border-green-500/50">
+                        <div
+                            class="w-16 h-16 bg-green-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M17 10c0-3.314-2.686-6-6-6S5 6.686 5 10c0 1.256.387 2.422 1.05 3.388L5 17l3.612-1.05A5.972 5.972 0 0011 16c3.314 0 6-2.686 6-6z"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-2">WhatsApp Directo</h4>
+                        <p class="text-slate-500 text-sm mb-4">Asistencia rápida para dudas técnicas.</p>
+                        <a href="https://wa.me/5217221595250" target="_blank"
+                            class="px-6 py-2 bg-green-600 hover:bg-green-500 text-white rounded-xl text-sm font-bold transition-all shadow-lg shadow-green-900/20">Abrir
+                            Chat</a>
+                    </div>
+
+                    <div class="glass-card p-8 flex flex-col items-center text-center group hover:border-purple-500/50">
+                        <div
+                            class="w-16 h-16 bg-purple-500/10 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                            <svg class="w-8 h-8 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path
+                                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </div>
+                        <h4 class="text-lg font-bold text-white mb-2">Portafolio</h4>
+                        <p class="text-slate-500 text-sm mb-4">Conoce más sobre el desarrollador detrás.</p>
+                        <a href="https://kevscl-dev.vercel.app/" target="_blank"
+                            class="text-purple-400 font-bold hover:underline">kevscl-dev.app</a>
+                    </div>
+                </div>
+
+                <!-- Developer Profile -->
+                <div class="glass-card p-8 overflow-hidden relative">
+                    <div class="flex flex-col md:flex-row items-center gap-8 relative z-10">
+                        <div
+                            class="w-32 h-32 bg-gradient-to-br from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center flex-shrink-0 shadow-2xl">
+                            <svg class="w-16 h-16 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                            </svg>
+                        </div>
+                        <div class="flex-1 text-center md:text-left">
+                            <div class="flex flex-col md:flex-row md:items-center gap-4 mb-4">
+                                <h3 class="text-2xl font-black text-white">Kevin Jesús Coyote Gil</h3>
+                                <span
+                                    class="px-3 py-1 bg-blue-500/20 text-blue-400 text-[10px] font-bold uppercase tracking-widest rounded-full border border-blue-500/20 self-center md:self-auto uppercase">Front-end
+                                    & Full Stack Developer</span>
+                            </div>
+                            <p class="text-slate-400 text-sm leading-relaxed mb-6 max-w-3xl">
+                                Creador de herramientas digitales enfocadas en la eficiencia y la privacidad. Este
+                                proyecto nace con la visión de proporcionar utilidades de procesamiento de alta calidad
+                                que operan bajo el control absoluto del usuario.
+                            </p>
+                            <div
+                                class="flex flex-wrap justify-center md:justify-start gap-6 text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2.5">
+                                        </path>
+                                    </svg>
+                                    Verificado
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-blue-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path
+                                            d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                            stroke-width="2.5"></path>
+                                    </svg>
+                                    Toluca, México
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" stroke-width="2.5"></path>
+                                    </svg>
+                                    GMT-6
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- FAQ Section -->
+                <div class="space-y-8">
+                    <h3 class="text-2xl font-black text-white flex items-center gap-3 italic">
+                        <span class="w-1.5 h-8 bg-blue-500 rounded-full"></span>
+                        Preguntas Frecuentes
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="glass-card p-6 border-l-2 border-blue-500/30">
+                            <h4 class="text-white font-bold mb-3 italic">¿Es realmente seguro procesar mis archivos
+                                aquí?</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed">Absolutamente. Al usar Python localmente,
+                                el código se ejecuta en tu máquina. Tus datos no se suben a la nube para ser procesados,
+                                lo que elimina el riesgo de intercepción.</p>
+                        </div>
+                        <div class="glass-card p-6 border-l-2 border-purple-500/30">
+                            <h4 class="text-white font-bold mb-3 italic">¿Por qué mi navegador usa mucha memoria al
+                                procesar?</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed">Debido a que el procesamiento es local, tu
+                                navegador actúa como el motor de transformación. Esto requiere recursos de RAM
+                                temporales mientras se realiza la tarea.</p>
+                        </div>
+                        <div class="glass-card p-6 border-l-2 border-emerald-500/30">
+                            <h4 class="text-white font-bold mb-3 italic">¿Puedo usar la herramienta sin conexión?</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed">Una vez cargada la herramienta de
+                                procesamiento, muchas funciones seguirán operando incluso si pierdes la conexión, ya que
+                                el motor ya reside en tu sistema.</p>
+                        </div>
+                        <div class="glass-card p-6 border-l-2 border-amber-500/30">
+                            <h4 class="text-white font-bold mb-3 italic">¿Cómo puedo reportar un error?</h4>
+                            <p class="text-slate-400 text-xs leading-relaxed">Puedes usar el botón de WhatsApp o
+                                enviarme un correo directamente. Agradezco mucho el feedback de la comunidad para seguir
+                                mejorando.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- El overlay para cuando esta cargando -->
+        <div id="loader"
+            class="fixed inset-0 bg-[#0f172a]/80 backdrop-blur-sm z-50 hidden flex-col items-center justify-center">
+            <div class="relative w-24 h-24">
+                <div class="absolute inset-0 border-4 border-blue-500/20 rounded-full"></div>
+                <div class="absolute inset-0 border-4 border-t-blue-500 rounded-full animate-spin"></div>
+            </div>
+            <p class="mt-6 text-xl font-bold text-slate-300 animate-pulse">¡Analizando tus datos!</p>
+        </div>
+    </main>
+
+    <script src="js/app.js"></script>
+</body>
+
+</html>
